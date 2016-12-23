@@ -72,7 +72,7 @@ public abstract class ImageProcessing {
 				sum+=tempV;
 			}
 		}*/
-        Log.i("value sum", sum + "");
+//        Log.i("value sum", sum + "");
         return sum;
     }
 
@@ -90,8 +90,8 @@ public abstract class ImageProcessing {
         final int frameSize = width * height;
         int sum = decodeYUV420SPtoRedSum(yuv420sp, width, height);
         double aver = Math.log((double) sum / (double) frameSize);
-        Log.i("average value", aver + "");
-        Log.i("framesize",width+":"+height);
+//        Log.i("average value", aver + "");
+//        Log.i("framesize",width+":"+height);
         return aver;
     }
 }

@@ -1,5 +1,15 @@
 package com.lyz.xinlv.activity;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,6 +31,7 @@ import android.graphics.Paint.Align;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
@@ -28,18 +39,25 @@ import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.lyz.Bean.UserDataBean;
 import com.lyz.monitor.utils.ImageProcessing;
+import com.lyz.utils.SaveData;
 
 /**
  * 程序的主入口
  *
  * @author liuyazhuang
  */
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements View.OnClickListener {
     //曲线
     private Timer timer = new Timer();
     //Timer任务，与Timer配套使用
@@ -94,12 +112,17 @@ public class MainActivity extends Activity {
     private static final double AXISYMAX = 5.82;
     private static final double AXISYMIN = 5.7;
     private static final int AXISXMAX = 200;
+    private Button mSaveDataBtn;
+    private String mdataString;
+    private String mfileName;
+    private UserDataBean mUserDataBean=new UserDataBean();
+    private List<Double> mDatas=new ArrayList<Double>();
 
 
     /**
      * 类型枚举
      *
-     * @author liuyazhuang
+     *
      */
     public static enum TYPE {
         GREEN, RED
@@ -128,7 +151,12 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+
+        mSaveDataBtn=(Button) findViewById(R.id.id_btn_savedata);
+        mSaveDataBtn.setOnClickListener(this);
+
         initConfig();
         initValueBuffer();
         YMAX = AXISYMAX;
@@ -215,7 +243,34 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId())
+        {
+            case R.id.id_btn_savedata:
+                long currenttime=System.currentTimeMillis();
+                SimpleDateFormat dateFormat=new SimpleDateFormat("yyyyMMdd-HHmmss");
+                Date date=new Date(currenttime);
+                String currentTimeStr=dateFormat.format(date);
 
+                Gson gson=new Gson();
+                mUserDataBean.setUserName("yuqing");
+                mUserDataBean.setDatas(mDatas);
+                mUserDataBean.setCurrentTime(currentTimeStr);
+                mUserDataBean.setFatigue(100);
+                final String jsonstring=gson.toJson(mUserDataBean);
+                mfileName=currentTimeStr;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        SaveData.saveData2Sdcard(jsonstring, mfileName);
+
+                    }
+                }).start();
+                Toast.makeText(MainActivity.this,"保存成功",Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
     /**
      * 创建图表
      *
@@ -341,6 +396,8 @@ public class MainActivity extends Activity {
         int length = series.getItemCount();
         addX = AXISXMAX;
         addY = gx;
+        // 把数据添加到mDatas中，用来保存到文件中
+        mDatas.add(gx);
         //将旧的点集中x和y的数值取出来放入backup中，并且将x的值减1，造成曲线向左平移的效果
 
         if (length > AXISXMAX) {
@@ -362,7 +419,7 @@ public class MainActivity extends Activity {
         //将新产生的点首先加入到点集中，然后在循环体中将坐标变换后的一系列点都重新加入到点集中
         for (int k = 0; k < length; k++) {
             series.add(xv[k], yv[k]);
-            Log.i("series item", series.getX(k) + " " + series.getY(k) + " " + length + " " + k);
+//            Log.i("series item", series.getX(k) + " " + series.getY(k) + " " + length + " " + k);
         }
         series.add(addX, addY);
         Log.i("new add point",addY+"");
@@ -572,4 +629,6 @@ public class MainActivity extends Activity {
 
         return result;
     }
+
+
 }

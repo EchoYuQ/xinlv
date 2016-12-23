@@ -1,4 +1,5 @@
 CHANGED,H:\AndroidWorkSpace3\xinlv\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\lyz\xinlv\activity\MainActivity$override.class
 CHANGED,H:\AndroidWorkSpace3\xinlv\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\android\tools\fd\runtime\AppPatchesLoaderImpl.class
+CHANGED,H:\AndroidWorkSpace3\xinlv\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\lyz\xinlv\activity\MainActivity$5$override.class
 CHANGED,H:\AndroidWorkSpace3\xinlv\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\lyz\xinlv\activity\MainActivity$4$override.class
 CHANGED,H:\AndroidWorkSpace3\xinlv\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\lyz\xinlv\activity\MainActivity$3$override.class

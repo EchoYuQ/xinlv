@@ -7,10 +7,10 @@ import java.util.List;
  * Created by yuqing on 2016/12/23.
  */
 public class UserDataBean {
-    private String userName;
-    private String currentTime;
-    private int fatigue;
-    private List<Double> datas=new ArrayList<>();
+    private String userName="";
+    private String currentTime="";
+    private int fatigue=-1;
+    private List<Double> datas=new ArrayList<Double>();
 
     public String getUserName() {
         return userName;

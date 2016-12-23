@@ -44,5 +44,16 @@
         android:layout_weight="1"
         android:text="@string/show" >
     </TextView>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/id_btn_savedata"
+        android:text="保存数据"
+        android:background="#f56d6b"
+        android:textColor="#ffffff"
+        android:layout_margin="10dp"
+        android:textSize="20sp"
+        />
+
 
 </LinearLayout>
