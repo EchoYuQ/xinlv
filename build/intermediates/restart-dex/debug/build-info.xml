@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<instant-run
+    abi="arm64-v8a,armeabi-v7a,armeabi"
+    api-level="23"
+    density="xxhdpi"
+    format="7"
+    timestamp="521589982866057" >
+
+    <task
+        name="javac"
+        duration="0" />
+    <task
+        name="instant-run-dex"
+        duration="0" />
+    <task
+        name="instant-run-transform"
+        duration="0" />
+    <task
+        name="verifier"
+        duration="0" />
+
+    <build timestamp="521150718740337" >
+        <artifact
+            location="H:\AndroidWorkSpace3\xinlv\build\outputs\apk\xinlv-debug.apk"
+            type="MAIN" />
+    </build>
+    <build timestamp="521589982866057" />
+
+</instant-run>
