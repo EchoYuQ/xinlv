@@ -394,42 +394,54 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mDataset.removeSeries(series);
         //判断当前点集中到底有多少点，因为屏幕总共只能容纳100个，所以当点数超过100时，长度永远是100
         int length = series.getItemCount();
-        addX = AXISXMAX;
-        addY = gx;
-        // 把数据添加到mDatas中，用来保存到文件中
-        mDatas.add(gx);
-        //将旧的点集中x和y的数值取出来放入backup中，并且将x的值减1，造成曲线向左平移的效果
 
-        if (length > AXISXMAX) {
-            for (int i = 1; i < length; i++) {
-                xv[i - 1] = (int) series.getX(i) - 1;
-                yv[i - 1] = series.getY(i);
-            }
-            length = AXISXMAX;
-        } else {
-            for (int i = 1; i < length; i++) {
-                xv[i] = (int) series.getX(i) - 1;
-                yv[i] = series.getY(i);
-                Log.i("xv yv", xv[i] + " " + yv[i] + " " + i + " " + length);
-            }
-        }
+        // 数据有效则添加，无效则清空数据集
+        if (gx<AXISYMAX&&gx>AXISYMIN)
+        {
+            addX = AXISXMAX;
+            addY = gx;
+            // 把数据添加到mDatas中，用来保存到文件中
+            mDatas.add(gx);
+            //将旧的点集中x和y的数值取出来放入backup中，并且将x的值减1，造成曲线向左平移的效果
 
-        // 清空series中的坐标点
-        series.clear();
-        //将新产生的点首先加入到点集中，然后在循环体中将坐标变换后的一系列点都重新加入到点集中
-        for (int k = 0; k < length; k++) {
-            series.add(xv[k], yv[k]);
+            if (length > AXISXMAX) {
+                for (int i = 1; i < length; i++) {
+                    xv[i - 1] = (int) series.getX(i) - 1;
+                    yv[i - 1] = series.getY(i);
+                }
+                length = AXISXMAX;
+            } else {
+                for (int i = 0; i < length; i++) {
+                    xv[i] = (int) series.getX(i) - 1;
+                    yv[i] = series.getY(i);
+                    Log.i("xv yv", xv[i] + " " + yv[i] + " " + i + " " + length);
+                }
+            }
+
+            // 清空series中的坐标点
+            series.clear();
+            //将新产生的点首先加入到点集中，然后在循环体中将坐标变换后的一系列点都重新加入到点集中
+            for (int k = 0; k < length; k++) {
+                series.add(xv[k], yv[k]);
 //            Log.i("series item", series.getX(k) + " " + series.getY(k) + " " + length + " " + k);
-        }
-        series.add(addX, addY);
-        Log.i("new add point",addY+"");
+            }
+            series.add(addX, addY);
+            Log.i("new add point",addY+"");
 
+
+        }else
+        {
+            mDatas.clear();
+            series.clear();
+        }
         //这里可以试验一下把顺序颠倒过来是什么效果，即先运行循环体，再添加新产生的点
         //在数据集中添加新的点集
         mDataset.addSeries(series);
         //视图更新，没有这一步，曲线不会呈现动态
         //如果在非UI主线程中，需要调用postInvalidate()，具体参考api
         chart.invalidate();
+
+
     }
 
 
