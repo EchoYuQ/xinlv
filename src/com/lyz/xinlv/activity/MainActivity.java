@@ -25,6 +25,7 @@ import org.achartengine.renderer.XYSeriesRenderer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Paint.Align;
@@ -66,7 +67,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static int j;
 
     private static double flag = 1;
-    private Handler handler;
+    private Handler handler=null;
     private String title = "pulse";
     private XYSeries series;
     private XYMultipleSeriesDataset mDataset;
@@ -115,14 +116,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mSaveDataBtn;
     private String mdataString;
     private String mfileName;
-    private UserDataBean mUserDataBean=new UserDataBean();
-    private List<Double> mDatas=new ArrayList<Double>();
+    private UserDataBean mUserDataBean = new UserDataBean();
+    private List<Double> mDatas = new ArrayList<Double>();
+    private int count;
 
 
     /**
      * 类型枚举
-     *
-     *
      */
     public static enum TYPE {
         GREEN, RED
@@ -154,7 +154,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
-        mSaveDataBtn=(Button) findViewById(R.id.id_btn_savedata);
+        mSaveDataBtn = (Button) findViewById(R.id.id_btn_savedata);
         mSaveDataBtn.setOnClickListener(this);
 
         initConfig();
@@ -202,15 +202,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         //这里的Handler实例将配合下面的Timer实例，完成定时更新图表的功能
 
-        handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                //        		刷新图表
-                updateChart();
+        if (handler==null)
+        {
+            handler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    //        		刷新图表
+                    updateChart();
 //                updateChart(t,gx);
-                super.handleMessage(msg);
-            }
-        };
+                    super.handleMessage(msg);
+                }
+            };
+        }
+
 
         task = new TimerTask() {
             @Override
@@ -245,21 +249,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        switch (v.getId())
-        {
+        switch (v.getId()) {
             case R.id.id_btn_savedata:
-                long currenttime=System.currentTimeMillis();
-                SimpleDateFormat dateFormat=new SimpleDateFormat("yyyyMMdd-HHmmss");
-                Date date=new Date(currenttime);
-                String currentTimeStr=dateFormat.format(date);
+                long currenttime = System.currentTimeMillis();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
+                Date date = new Date(currenttime);
+                String currentTimeStr = dateFormat.format(date);
 
-                Gson gson=new Gson();
+                Gson gson = new Gson();
                 mUserDataBean.setUserName("yuqing");
                 mUserDataBean.setDatas(mDatas);
                 mUserDataBean.setCurrentTime(currentTimeStr);
                 mUserDataBean.setFatigue(100);
-                final String jsonstring=gson.toJson(mUserDataBean);
-                mfileName=currentTimeStr;
+                final String jsonstring = gson.toJson(mUserDataBean);
+                mfileName = currentTimeStr;
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -267,10 +270,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
                     }
                 }).start();
-                Toast.makeText(MainActivity.this,"保存成功",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
                 break;
         }
     }
+
     /**
      * 创建图表
      *
@@ -342,10 +346,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private void initValueBuffer() {
         for (int i = 0; i < AXISXMAX; i++) {
             xv[i] = i;
-            yv[i] = AXISYMAX+1;
-            series.add(xv[i],yv[i]);
+            yv[i] = AXISYMAX + 1;
+            series.add(xv[i], yv[i]);
         }
-        series.add(AXISXMAX,AXISYMAX+1);
+        series.add(AXISXMAX, AXISYMAX + 1);
 
     }
 
@@ -396,12 +400,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
         int length = series.getItemCount();
 
         // 数据有效则添加，无效则清空数据集
-        if (gx<AXISYMAX&&gx>AXISYMIN)
-        {
+        if (gx < AXISYMAX && gx > AXISYMIN) {
             addX = AXISXMAX;
             addY = gx;
             // 把数据添加到mDatas中，用来保存到文件中
             mDatas.add(gx);
+            count++;
+            // 如果有效数据采集到300个，就跳转到保存数据的界面
+            if (count >= 300) {
+                Intent intent = new Intent(MainActivity.this, SaveDateActivity.class);
+                startActivity(intent);
+                handler=null;
+            }
             //将旧的点集中x和y的数值取出来放入backup中，并且将x的值减1，造成曲线向左平移的效果
 
             if (length > AXISXMAX) {
@@ -426,11 +436,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 //            Log.i("series item", series.getX(k) + " " + series.getY(k) + " " + length + " " + k);
             }
             series.add(addX, addY);
-            Log.i("new add point",addY+"");
+            Log.i("new add point", addY + "");
 
 
-        }else
-        {
+        } else {
             mDatas.clear();
             series.clear();
         }
