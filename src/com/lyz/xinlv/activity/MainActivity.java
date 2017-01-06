@@ -1,15 +1,6 @@
 package com.lyz.xinlv.activity;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Formatter;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -32,7 +23,6 @@ import android.graphics.Paint.Align;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
@@ -43,15 +33,11 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.lyz.Bean.UserDataBean;
 import com.lyz.monitor.utils.ImageProcessing;
-import com.lyz.utils.SaveData;
 
 /**
  * 程序的主入口
@@ -110,10 +96,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static double lastYMAX;
     private static double lastYMIN;
     private static int ignoreNum = 0;
-    private static final double AXISYMAX = 5.82;
+    private static final double AXISYMAX = 5.85;
     private static final double AXISYMIN = 5.7;
     private static final int AXISXMAX = 200;
-    private Button mSaveDataBtn;
     private String mdataString;
     private String mfileName;
     private UserDataBean mUserDataBean = new UserDataBean();
@@ -154,8 +139,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
-        mSaveDataBtn = (Button) findViewById(R.id.id_btn_savedata);
-        mSaveDataBtn.setOnClickListener(this);
+
 
         initConfig();
         initValueBuffer();
@@ -250,28 +234,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.id_btn_savedata:
-                long currenttime = System.currentTimeMillis();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
-                Date date = new Date(currenttime);
-                String currentTimeStr = dateFormat.format(date);
 
-                Gson gson = new Gson();
-                mUserDataBean.setUserName("yuqing");
-                mUserDataBean.setDatas(mDatas);
-                mUserDataBean.setCurrentTime(currentTimeStr);
-                mUserDataBean.setFatigue(100);
-                final String jsonstring = gson.toJson(mUserDataBean);
-                mfileName = currentTimeStr;
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        SaveData.saveData2Sdcard(jsonstring, mfileName);
-
-                    }
-                }).start();
-                Toast.makeText(MainActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
-                break;
         }
     }
 
@@ -408,9 +371,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
             count++;
             // 如果有效数据采集到300个，就跳转到保存数据的界面
             if (count >= 300) {
+
+//                Constants.datas=mDatas;
                 Intent intent = new Intent(MainActivity.this, SaveDateActivity.class);
+                Bundle bundle=new Bundle();
+                UserDataBean userDataBean=new UserDataBean();
+                userDataBean.setDatas(mDatas);
+                bundle.putSerializable("userdatabean",userDataBean);
+                intent.putExtras(bundle);
                 startActivity(intent);
                 handler=null;
+                Log.i("datas",Constants.datas.toString());
+
             }
             //将旧的点集中x和y的数值取出来放入backup中，并且将x的值减1，造成曲线向左平移的效果
 
@@ -440,6 +412,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
         } else {
+            count=0;
             mDatas.clear();
             series.clear();
         }
