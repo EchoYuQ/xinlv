@@ -17,6 +17,8 @@ public class UserDataBean implements Serializable{
     private int fatigue=-1;
     private List<Double> datas=new ArrayList<Double>();
 
+    private List<Double> new_datas=new ArrayList<Double>();
+
     public String getUserName() {
         return userName;
     }
@@ -63,5 +65,13 @@ public class UserDataBean implements Serializable{
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public List<Double> getNew_datas() {
+        return new_datas;
+    }
+
+    public void setNew_datas(List<Double> new_datas) {
+        this.new_datas = new_datas;
     }
 }

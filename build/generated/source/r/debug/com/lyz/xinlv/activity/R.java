@@ -18,8 +18,14 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int action_settings=0x7f080006;
-        public static final int id_btn_savedata=0x7f080005;
+        public static final int action_settings=0x7f08000c;
+        public static final int id_btn_savedata=0x7f08000b;
+        public static final int id_et_age=0x7f080006;
+        public static final int id_et_fatigue=0x7f08000a;
+        public static final int id_et_usermame=0x7f080005;
+        public static final int id_rb_man=0x7f080008;
+        public static final int id_rb_woman=0x7f080009;
+        public static final int id_rg_sex=0x7f080007;
         public static final int linearLayout1=0x7f080001;
         public static final int preview=0x7f080000;
         public static final int text=0x7f080002;
@@ -28,6 +34,7 @@ public final class R {
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
+        public static final int activity_savedata=0x7f030001;
     }
     public static final class menu {
         public static final int main=0x7f070000;

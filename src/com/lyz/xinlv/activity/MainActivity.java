@@ -97,7 +97,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static double lastYMIN;
     private static int ignoreNum = 0;
     private static final double AXISYMAX = 5.85;
-    private static final double AXISYMIN = 5.7;
+    private static final double AXISYMIN = 5.5;
     private static final int AXISXMAX = 200;
     private String mdataString;
     private String mfileName;
@@ -205,11 +205,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
             public void run() {
                 Message message = new Message();
                 message.what = 1;
+                if (handler!=null){
+
                 handler.sendMessage(message);
+                }
             }
         };
 
-        timer.schedule(task, 200, 50);           //曲线
+        timer.schedule(task, 100, 100);           //曲线
         //获取SurfaceView控件
         preview = (SurfaceView) findViewById(R.id.preview);
         previewHolder = preview.getHolder();
@@ -370,7 +373,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             mDatas.add(gx);
             count++;
             // 如果有效数据采集到300个，就跳转到保存数据的界面
-            if (count >= 300) {
+            if (count >= 100) {
 
 //                Constants.datas=mDatas;
                 Intent intent = new Intent(MainActivity.this, SaveDateActivity.class);
@@ -379,9 +382,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 userDataBean.setDatas(mDatas);
                 bundle.putSerializable("userdatabean",userDataBean);
                 intent.putExtras(bundle);
-                startActivity(intent);
                 handler=null;
-                Log.i("datas",Constants.datas.toString());
+                startActivity(intent);
+
 
             }
             //将旧的点集中x和y的数值取出来放入backup中，并且将x的值减1，造成曲线向左平移的效果
@@ -577,8 +580,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Camera.Parameters parameters = camera.getParameters();
             parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
             Camera.Size size = getSmallestPreviewSize(width, height, parameters);
-            size.width = 480;
-            size.height = 360;
+//            size.width = 480;
+//            size.height = 360;
             if (size != null) {
                 parameters.setPreviewSize(size.width, size.height);
                 //				Log.d(TAG, "Using width=" + size.width + " height="	+ size.height);

@@ -1,6 +1,6 @@
 -- Merging decision tree log ---
 manifest
-ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:2:1-35:12
+ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:2:1-40:12
 	package
 		ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:3:5-37
 	android:versionName
@@ -44,7 +44,7 @@ ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:17:5-80
 	android:name
 		ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:17:22-78
 application
-ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:19:5-33:19
+ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:19:5-38:19
 	android:label
 		ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:22:9-41
 	android:allowBackup
@@ -69,3 +69,9 @@ category#android.intent.category.LAUNCHER
 ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:30:17-77
 	android:name
 		ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:30:27-74
+activity#com.lyz.xinlv.activity.SaveDateActivity
+ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:33:9-37:20
+	android:label
+		ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:35:13-45
+	android:name
+		ADDED from H:\AndroidWorkSpace3\xinlv\AndroidManifest.xml:34:13-67

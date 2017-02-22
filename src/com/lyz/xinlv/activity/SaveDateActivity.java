@@ -12,10 +12,13 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.lyz.Bean.UserDataBean;
+import com.lyz.SG.SGFilter;
 import com.lyz.utils.SaveData;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by yuqing on 2017/1/1.
@@ -61,6 +64,30 @@ public class SaveDateActivity extends Activity implements View.OnClickListener {
             case R.id.id_btn_savedata:
                 final UserDataBean userDataBean = (UserDataBean) getIntent().getSerializableExtra("userdatabean");
                 Log.i("Constants.datas", userDataBean.getDatas().toString());
+
+                // 将源数据List转成数组
+                List<Double> data_origin_list=userDataBean.getDatas();
+                double[] data_origin=new double[data_origin_list.size()];
+                for(int i=0;i<data_origin_list.size();i++)
+                {
+                    data_origin[i]=data_origin_list.get(i);
+                }
+                double[] data_smoothed=new double[data_origin_list.size()];
+
+                // SG算法的参数矩阵
+                double[] coeffs = SGFilter.computeSGCoefficients(5, 5, 5);
+                // SG算法去噪处理
+                data_smoothed=new SGFilter(5, 5).smooth(data_origin, coeffs);
+
+                List<Double> data_smoothed_list=new ArrayList<Double>();
+                for(int i=0;i<data_smoothed.length;i++)
+                {
+                    data_smoothed_list.add(data_smoothed[i]);
+                }
+                Log.i("data_smoothed.length",data_smoothed.length+"");
+
+                userDataBean.setNew_datas(data_smoothed_list);
+
                 long currenttime = System.currentTimeMillis();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
                 Date date = new Date(currenttime);
