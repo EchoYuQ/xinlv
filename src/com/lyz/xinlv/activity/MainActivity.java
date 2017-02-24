@@ -49,11 +49,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Timer timer = new Timer();
     //Timer任务，与Timer配套使用
     private TimerTask task;
-    private static double gx;
+
+    // 灰度值
+    private static double brightvalue;
+    // 红色通道值
+    private static double redvalue;
     private static int j;
 
     private static double flag = 1;
-    private Handler handler=null;
+    private Handler handler = null;
     private String title = "pulse";
     private XYSeries series;
     private XYMultipleSeriesDataset mDataset;
@@ -86,24 +90,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static int averageIndex = 0;
     private static final int averageArraySize = 4;
     private static final int[] averageArray = new int[averageArraySize];
-    private static double detaMax;
-    private static double YMAX;
-    private static double waveMax;
-    private static double detaMin;
-    private static double YMIN;
-    private static double waveMin;
-    private static double deta;
-    private static double lastYMAX;
-    private static double lastYMIN;
-    private static int ignoreNum = 0;
-    private static final double AXISYMAX = 5.85;
-    private static final double AXISYMIN = 5.5;
-    private static final int AXISXMAX = 200;
-    private String mdataString;
-    private String mfileName;
+    private  double YMAX=AXISYMAX;
+    private  double YMIN=AXISYMIN;
+    private static final double AXISYMAX = 5;
+    private static final double AXISYMIN = 4;
+    private static final int AXISXMAX = 60;
     private UserDataBean mUserDataBean = new UserDataBean();
     private List<Double> mDatas = new ArrayList<Double>();
     private int count;
+    private double currentYtop = AXISYMAX;
+    private double currentYbottom = AXISYMIN;
 
 
     /**
@@ -140,14 +136,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         setContentView(R.layout.activity_main);
 
 
-
         initConfig();
         initValueBuffer();
-        YMAX = AXISYMAX;
-        YMIN = AXISYMIN;
-        waveMax = (YMAX + YMIN) / 2;
-        waveMin = (YMAX + YMIN) / 2;
-        Log.i("11111111", String.valueOf(waveMin) + YMIN);
     }
 
     /**
@@ -179,21 +169,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
         setChartSettings(renderer, "X", "Y", 0, AXISXMAX, AXISYMIN, AXISYMAX, Color.WHITE, Color.WHITE);
 
         //生成图表
-        chart = ChartFactory.getLineChartView(context, mDataset, renderer);
+        chart = ChartFactory.getCubeLineChartView(context, mDataset, renderer,0.3f);
 
         //将图表添加到布局中去
         layout.addView(chart, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         //这里的Handler实例将配合下面的Timer实例，完成定时更新图表的功能
 
-        if (handler==null)
-        {
+        if (handler == null) {
             handler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
                     //        		刷新图表
                     updateChart();
-//                updateChart(t,gx);
+//                updateChart(t,brightvalue);
                     super.handleMessage(msg);
                 }
             };
@@ -205,9 +194,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
             public void run() {
                 Message message = new Message();
                 message.what = 1;
-                if (handler!=null){
+                if (handler != null) {
 
-                handler.sendMessage(message);
+                    handler.sendMessage(message);
                 }
             }
         };
@@ -257,7 +246,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         r.setColor(Color.RED);
 //		r.setPointStyle(null);
 //		r.setFillPoints(fill);
-        r.setLineWidth(10);
+        r.setLineWidth(10f);
         renderer.addSeriesRenderer(r);
         return renderer;
     }
@@ -288,13 +277,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         renderer.setAxesColor(axesColor);
         renderer.setLabelsColor(labelsColor);
         renderer.setShowGrid(false);
-        renderer.setGridColor(Color.GREEN);
         renderer.setXLabels(20);
-        renderer.setYLabels(10);
-        renderer.setXTitle("Time");
-        renderer.setYTitle("mmHg");
         renderer.setYLabelsAlign(Align.RIGHT);
-        renderer.setPointSize((float) 3);
+        renderer.setPointSize((float) 8);
         renderer.setShowLegend(false);
         renderer.setClickEnabled(false);
 //        renderer.setPanEnabled(false, false);
@@ -327,14 +312,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
         // 自动放大缩小Y轴的算法
 
 
-        /*if (gx == YMAX || gx == YMIN) {
+        /*if (brightvalue == YMAX || brightvalue == YMIN) {
             ignoreNum = 50;
         } else {
             ignoreNum--;
         }
-        if (ignoreNum <= 0&&gx!=0) {
-            waveMin = Math.min(waveMin, gx);
-            waveMax = Math.max(waveMax, gx);
+        if (ignoreNum <= 0&&brightvalue!=0) {
+            waveMin = Math.min(waveMin, brightvalue);
+            waveMax = Math.max(waveMax, brightvalue);
             detaMax = YMAX - waveMax;
             detaMin = waveMin - YMIN;
             deta = waveMax - waveMin;
@@ -353,7 +338,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             lastYMAX = YMAX;
             lastYMIN = YMIN;
             Log.i("info","YMAX:"+YMAX+" YMIN:"+YMIN+" lastYMAX:"+lastYMAX+" lastMIN:"+lastYMIN+
-                    " waveMax:"+ waveMax +" waveMin:"+ waveMin +" ignoreNum:"+ignoreNum+" gx:"+gx );
+                    " waveMax:"+ waveMax +" waveMin:"+ waveMin +" ignoreNum:"+ignoreNum+" brightvalue:"+brightvalue );
         }*/
 
 
@@ -366,23 +351,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
         int length = series.getItemCount();
 
         // 数据有效则添加，无效则清空数据集
-        if (gx < AXISYMAX && gx > AXISYMIN) {
+        // 另外R通道平均值在5.4以上
+        if (brightvalue < AXISYMAX && brightvalue > AXISYMIN&&redvalue>5.4) {
             addX = AXISXMAX;
-            addY = gx;
+            addY = brightvalue;
             // 把数据添加到mDatas中，用来保存到文件中
-            mDatas.add(gx);
+            mDatas.add(brightvalue);
             count++;
             // 如果有效数据采集到300个，就跳转到保存数据的界面
-            if (count >= 100) {
+            if (count >= 1000) {
 
 //                Constants.datas=mDatas;
                 Intent intent = new Intent(MainActivity.this, SaveDateActivity.class);
-                Bundle bundle=new Bundle();
-                UserDataBean userDataBean=new UserDataBean();
+                Bundle bundle = new Bundle();
+                UserDataBean userDataBean = new UserDataBean();
                 userDataBean.setDatas(mDatas);
-                bundle.putSerializable("userdatabean",userDataBean);
+                bundle.putSerializable("userdatabean", userDataBean);
                 intent.putExtras(bundle);
-                handler=null;
+                handler = null;
                 startActivity(intent);
 
 
@@ -413,9 +399,33 @@ public class MainActivity extends Activity implements View.OnClickListener {
             series.add(addX, addY);
             Log.i("new add point", addY + "");
 
+            // 自动调整Y轴阈值算法
+            if (series.getMaxY()>0&&series.getMinY()<100)
+            {
+                YMAX = series.getMaxY();
+                YMIN = series.getMinY();
+            }
+//            Log.i("max min ",YMAX+" "+YMIN);
+
+            if (currentYtop - YMAX < 0.01) {
+                currentYtop += 0.01;
+                renderer.setYAxisMax(currentYtop);
+            } else if (currentYtop - YMAX > 0.04) {
+                currentYtop -= 0.01;
+                renderer.setYAxisMax(currentYtop);
+            }
+
+            if (YMIN - currentYbottom > 0.04) {
+                currentYbottom += 0.01;
+                renderer.setYAxisMin(currentYbottom);
+            } else if (YMIN - currentYbottom < 0.01) {
+                currentYbottom -= 0.01;
+                renderer.setYAxisMin(currentYbottom);
+            }
+//            Log.i("Ytop Ybottom",currentYtop+" "+currentYbottom);
 
         } else {
-            count=0;
+            count = 0;
             mDatas.clear();
             series.clear();
         }
@@ -471,19 +481,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
             int width = size.width;
             int height = size.height;
             //图像处理
-            double imgAvg = ImageProcessing.decodeYUV420SPtoRedAvg(data.clone(), height, width);
-            if (imgAvg > YMAX) {
-                gx = YMAX;
-            } else if (imgAvg < YMIN) {
-                gx = YMIN;
-            } else {
-                gx = imgAvg;
-            }
+            double[] imgAvg = ImageProcessing.decodeYUV420SPtoRedAvg(data.clone(), height, width);
+            redvalue=imgAvg[0];
+            brightvalue =imgAvg[1];
 
-            text1.setText("平均像素值是" + String.valueOf(imgAvg));
+
+            text1.setText("平均像素值是" + brightvalue);
             //像素平均值imgAvg,日志
             //Log.i(TAG, "imgAvg=" + imgAvg);
-            if (imgAvg == 0 || imgAvg == 255) {
+            if (imgAvg[1] == 0 || imgAvg[1] == 255) {
                 processing.set(false);
                 return;
             }
@@ -499,17 +505,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
             //计算平均值
             int rollingAverage = (averageArrayCnt > 0) ? (averageArrayAvg / averageArrayCnt) : 0;
             TYPE newType = currentType;
-            if (imgAvg < rollingAverage) {
-                newType = TYPE.RED;
-                if (newType != currentType) {
-                    beats++;
-                    flag = 0;
-                    text2.setText("脉冲数是" + String.valueOf(beats));
-                    //Log.e(TAG, "BEAT!! beats=" + beats);
-                }
-            } else if (imgAvg > rollingAverage) {
-                newType = TYPE.GREEN;
-            }
+//            if (imgAvg < rollingAverage) {
+//                newType = TYPE.RED;
+//                if (newType != currentType) {
+//                    beats++;
+//                    flag = 0;
+//                    text2.setText("脉冲数是" + String.valueOf(beats));
+//                    //Log.e(TAG, "BEAT!! beats=" + beats);
+//                }
+//            } else if (imgAvg > rollingAverage) {
+//                newType = TYPE.GREEN;
+//            }
 
             if (averageIndex == averageArraySize)
                 averageIndex = 0;
@@ -527,7 +533,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             if (totalTimeInSecs >= 2) {
                 double bps = (beats / totalTimeInSecs);
                 int dpm = (int) (bps * 60d);
-                if (dpm < 30 || dpm > 180 || imgAvg < 200) {
+                if (dpm < 30 || dpm > 180 ) {
                     //获取系统开始时间（ms）
                     startTime = System.currentTimeMillis();
                     //beats心跳总数

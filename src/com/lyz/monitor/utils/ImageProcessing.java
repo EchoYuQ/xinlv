@@ -17,11 +17,14 @@ public abstract class ImageProcessing {
      * @param height
      * @return
      */
-    private static int decodeYUV420SPtoRedSum(byte[] yuv420sp, int width, int height) {
+    private static int[] decodeYUV420SPtoRedSum(byte[] yuv420sp, int width, int height) {
+        int[] res = new int[]{0, 0};
         if (yuv420sp == null)
-            return 0;
+            return res;
         final int frameSize = width * height;
+        // sum为红色通道，sum1为灰度
         int sum = 0;
+        int sum1 = 0;
         // 计算红色通道的平均值算法。
         for (int j = 0, yp = 0; j < height; j++) {
             int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
@@ -59,21 +62,24 @@ public abstract class ImageProcessing {
                 sum += red;
 
                 int temp = (int) (0.229 * red + 0.587 * green + 0.114 * blue);
-                sum += temp;
+                sum1 += temp;
 
             }
+
         }
 
         // 计算灰度值平均值算法
         /*for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
+            for (int j = 0; j < height; j++) {
 				int index=i+j*width;
 				int tempV=yuv420sp[index]&0xff;
 				sum+=tempV;
 			}
 		}*/
 //        Log.i("value sum", sum + "");
-        return sum;
+        res[0] = sum;
+        res[1] = sum1;
+        return res;
     }
 
     /**
@@ -82,16 +88,18 @@ public abstract class ImageProcessing {
      * @param yuv420sp
      * @param width
      * @param height
-     * @return
+     * @return res[0]为红色通道，res[1]为灰度
      */
-    public static double decodeYUV420SPtoRedAvg(byte[] yuv420sp, int width, int height) {
+    public static double[] decodeYUV420SPtoRedAvg(byte[] yuv420sp, int width, int height) {
+        double[] res=new double[]{0,0};
         if (yuv420sp == null)
-            return 0;
+            return res;
         final int frameSize = width * height;
-        int sum = decodeYUV420SPtoRedSum(yuv420sp, width, height);
-        double aver = Math.log((double) sum / (double) frameSize);
+        int[] sum = decodeYUV420SPtoRedSum(yuv420sp, width, height);
+        res[0] = Math.log((double) sum[0] / (double) frameSize);
+        res[1] = Math.log((double) sum[1] / (double) frameSize);
 //        Log.i("average value", aver + "");
 //        Log.i("framesize",width+":"+height);
-        return aver;
+        return res;
     }
 }
