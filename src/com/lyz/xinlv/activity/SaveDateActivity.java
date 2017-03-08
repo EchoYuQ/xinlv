@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.lyz.Bean.UserDataBean;
 import com.lyz.SG.SGFilter;
+import com.lyz.monitor.utils.CalculateHeartRate;
 import com.lyz.utils.SaveData;
 
 import java.text.SimpleDateFormat;
@@ -65,7 +66,9 @@ public class SaveDateActivity extends Activity implements View.OnClickListener {
                 final UserDataBean userDataBean = (UserDataBean) getIntent().getSerializableExtra("userdatabean");
                 Log.i("Constants.datas", userDataBean.getDatas().toString());
 
+
                 // 将源数据List转成数组
+                /*
                 List<Double> data_origin_list=userDataBean.getDatas();
                 double[] data_origin=new double[data_origin_list.size()];
                 for(int i=0;i<data_origin_list.size();i++)
@@ -78,15 +81,22 @@ public class SaveDateActivity extends Activity implements View.OnClickListener {
                 double[] coeffs = SGFilter.computeSGCoefficients(5, 5, 5);
                 // SG算法去噪处理
                 data_smoothed=new SGFilter(5, 5).smooth(data_origin, coeffs);
-
+                // data_smoothed_list为SG算法处理后的值列表
                 List<Double> data_smoothed_list=new ArrayList<Double>();
-                for(int i=0;i<data_smoothed.length;i++)
+                for(int i=10;i<data_smoothed.length-10;i++)
                 {
                     data_smoothed_list.add(data_smoothed[i]);
                 }
                 Log.i("data_smoothed.length",data_smoothed.length+"");
-
+                System.out.println(data_smoothed_list);
+                // peaksList为峰的横坐标列表
+                List<Integer> peaksList=CalculateHeartRate.findPeaks(data_smoothed_list);
+                int heartRate=CalculateHeartRate.calHeartRate(peaksList,100);
+                Log.i("heart rate",heartRate+"");
+                userDataBean.setRr_datas(CalculateHeartRate.calRRInteval(peaksList));
+                System.out.println(userDataBean.getRr_datas());
                 userDataBean.setNew_datas(data_smoothed_list);
+                */
 
                 long currenttime = System.currentTimeMillis();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");

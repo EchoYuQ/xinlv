@@ -1,3 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<items version="2" />
+<items version="2" >
 
+    <item
+        jar="H:\AndroidWorkSpace3\xinlv\libs\commons-math-2.2.jar"
+        jumboMode="false"
+        revision="23.0.3"
+        sha1="4877b85d388275f994a5cfc7eceb73a8045d3006">
+        <dex dex="H:\AndroidWorkSpace3\xinlv\build\intermediates\pre-dexed\debug\commons-math-2.2_7a12b29b6e054f81224ecf001b3d4f3f833032ef.jar" />
+    </item>
+    <item
+        jar="H:\AndroidWorkSpace3\xinlv\libs\achartengine-1.0.0.jar"
+        jumboMode="false"
+        revision="23.0.3"
+        sha1="b2bb0af9f390c0edd4d7d95f613f38da3abe0144">
+        <dex dex="H:\AndroidWorkSpace3\xinlv\build\intermediates\pre-dexed\debug\achartengine-1.0.0_faa7f0d56293339871fd9907b731d77b9c5d8597.jar" />
+    </item>
+    <item
+        jar="H:\AndroidWorkSpace3\xinlv\libs\android-support-v4.jar"
+        jumboMode="false"
+        revision="23.0.3"
+        sha1="ded9acc6a9792b8f1afc470f0c9cd36d178914cd">
+        <dex dex="H:\AndroidWorkSpace3\xinlv\build\intermediates\pre-dexed\debug\android-support-v4_2b2b0f09dd12b9517ea6fece0ed51365bebf77f8.jar" />
+    </item>
+    <item
+        jar="H:\AndroidWorkSpace3\xinlv\libs\gson-2.2.4.jar"
+        jumboMode="false"
+        revision="23.0.3"
+        sha1="973e832af433b44c3ed11c426f2f390b29f3f3f8">
+        <dex dex="H:\AndroidWorkSpace3\xinlv\build\intermediates\pre-dexed\debug\gson-2.2.4_833a7fb42f8abefdd89ab78a61481ddb31e04e97.jar" />
+    </item>
+
+</items>

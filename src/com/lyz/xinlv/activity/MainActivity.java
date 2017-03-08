@@ -35,8 +35,11 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lyz.Bean.UserDataBean;
+import com.lyz.SG.SGFilter;
+import com.lyz.monitor.utils.CalculateHeartRate;
 import com.lyz.monitor.utils.ImageProcessing;
 
 /**
@@ -46,7 +49,7 @@ import com.lyz.monitor.utils.ImageProcessing;
  */
 public class MainActivity extends Activity implements View.OnClickListener {
     //曲线
-    private Timer timer = new Timer();
+    private Timer timer ;
     //Timer任务，与Timer配套使用
     private TimerTask task;
 
@@ -54,6 +57,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static double brightvalue;
     // 红色通道值
     private static double redvalue;
+    private static double greenvalue;
+    private static double bluevalue;
     private static int j;
 
     private static double flag = 1;
@@ -90,13 +95,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static int averageIndex = 0;
     private static final int averageArraySize = 4;
     private static final int[] averageArray = new int[averageArraySize];
-    private  double YMAX=AXISYMAX;
-    private  double YMIN=AXISYMIN;
+    private double YMAX = AXISYMAX;
+    private double YMIN = AXISYMIN;
+    // 两帧图像的间隔时间，ms
+    private static final int INTERVAL = 50;
     private static final double AXISYMAX = 5;
     private static final double AXISYMIN = 4;
-    private static final int AXISXMAX = 60;
+    private static final int AXISXMAX = 6000 / INTERVAL;
+
+
     private UserDataBean mUserDataBean = new UserDataBean();
     private List<Double> mDatas = new ArrayList<Double>();
+    private List<Double> mRedDatas = new ArrayList<Double>();
+    private List<Double> mGreenDatas = new ArrayList<Double>();
+    private List<Double> mBlueDatas = new ArrayList<Double>();
     private int count;
     private double currentYtop = AXISYMAX;
     private double currentYbottom = AXISYMIN;
@@ -109,7 +121,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         GREEN, RED
     }
 
-    ;
+
     //设置默认类型
     private static TYPE currentType = TYPE.GREEN;
 
@@ -131,13 +143,32 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-
-
         initConfig();
-        initValueBuffer();
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onStart() {
+        count=0;
+        handler=null;
+        mDatas.clear();
+        mRedDatas.clear();
+        mGreenDatas.clear();
+        mBlueDatas.clear();
+        timer=null;
+        task=null;
+
+        initTimer();
+        Log.i("onStart","onStart()");
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+
+        super.onStop();
     }
 
     /**
@@ -160,7 +191,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mDataset.addSeries(series);
 
         //以下都是曲线的样式和属性等等的设置，renderer相当于一个用来给图表做渲染的句柄
-        int color = Color.GREEN;
+        int color = Color.RED;
         PointStyle style = PointStyle.CIRCLE;
         renderer = buildRenderer(color, style, true);
 
@@ -169,20 +200,36 @@ public class MainActivity extends Activity implements View.OnClickListener {
         setChartSettings(renderer, "X", "Y", 0, AXISXMAX, AXISYMIN, AXISYMAX, Color.WHITE, Color.WHITE);
 
         //生成图表
-        chart = ChartFactory.getCubeLineChartView(context, mDataset, renderer,0.3f);
+        chart = ChartFactory.getCubeLineChartView(context, mDataset, renderer, 0.3f);
 
         //将图表添加到布局中去
         layout.addView(chart, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         //这里的Handler实例将配合下面的Timer实例，完成定时更新图表的功能
 
+        //获取SurfaceView控件
+        preview = (SurfaceView) findViewById(R.id.preview);
+        previewHolder = preview.getHolder();
+        previewHolder.addCallback(surfaceCallback);
+        previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        //		image = findViewById(R.id.image);
+        text = (TextView) findViewById(R.id.text);
+        text1 = (TextView) findViewById(R.id.text1);
+        text2 = (TextView) findViewById(R.id.text2);
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
+    }
+
+    /**
+     * 初始化定时器
+     */
+    private void initTimer() {
         if (handler == null) {
             handler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
                     //        		刷新图表
                     updateChart();
-//                updateChart(t,brightvalue);
                     super.handleMessage(msg);
                 }
             };
@@ -200,19 +247,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 }
             }
         };
-
-        timer.schedule(task, 100, 100);           //曲线
-        //获取SurfaceView控件
-        preview = (SurfaceView) findViewById(R.id.preview);
-        previewHolder = preview.getHolder();
-        previewHolder.addCallback(surfaceCallback);
-        previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        //		image = findViewById(R.id.image);
-        text = (TextView) findViewById(R.id.text);
-        text1 = (TextView) findViewById(R.id.text1);
-        text2 = (TextView) findViewById(R.id.text2);
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
+        timer=new Timer();
+        timer.schedule(task, 100, INTERVAL);           //曲线
     }
 
     //	曲线
@@ -243,7 +279,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         //设置图表中曲线本身的样式，包括颜色、点的大小以及线的粗细等
         XYSeriesRenderer r = new XYSeriesRenderer();
-        r.setColor(Color.RED);
+        r.setColor(color);
 //		r.setPointStyle(null);
 //		r.setFillPoints(fill);
         r.setLineWidth(10f);
@@ -267,21 +303,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected void setChartSettings(XYMultipleSeriesRenderer renderer, String xTitle, String yTitle,
                                     double xMin, double xMax, double yMin, double yMax, int axesColor, int labelsColor) {
         //有关对图表的渲染可参看api文档
-        renderer.setChartTitle(title);
-        renderer.setXTitle(xTitle);
-        renderer.setYTitle(yTitle);
+//        renderer.setChartTitle(title);
+//        renderer.setXTitle(xTitle);
+//        renderer.setYTitle(yTitle);
         renderer.setXAxisMin(xMin);
         renderer.setXAxisMax(xMax);
         renderer.setYAxisMin(yMin);
         renderer.setYAxisMax(yMax);
-        renderer.setAxesColor(axesColor);
-        renderer.setLabelsColor(labelsColor);
+//        renderer.setAxesColor(axesColor);
+//        renderer.setLabelsColor(labelsColor);
         renderer.setShowGrid(false);
-        renderer.setXLabels(20);
-        renderer.setYLabelsAlign(Align.RIGHT);
+//        renderer.setXLabels(20);
+//        renderer.setYLabelsAlign(Align.RIGHT);
         renderer.setPointSize((float) 8);
         renderer.setShowLegend(false);
         renderer.setClickEnabled(false);
+        renderer.setShowAxes(false);
+        renderer.setShowLabels(false);
+        renderer.setMargins(new int[]{0,0,0,0});
 //        renderer.setPanEnabled(false, false);
 //        renderer.setZoomEnabled(false, false);
         Log.i("clickable", renderer.isClickEnabled() + "");
@@ -291,55 +330,23 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
 
-    /**
-     * 数据缓存器的初始化
-     */
-    private void initValueBuffer() {
-        for (int i = 0; i < AXISXMAX; i++) {
-            xv[i] = i;
-            yv[i] = AXISYMAX + 1;
-            series.add(xv[i], yv[i]);
-        }
-        series.add(AXISXMAX, AXISYMAX + 1);
-
-    }
+//    /**
+//     * 数据缓存器的初始化
+//     */
+//    private void initValueBuffer() {
+//        for (int i = 0; i < AXISXMAX; i++) {
+//            xv[i] = i;
+//            yv[i] = AXISYMAX + 1;
+//            series.add(xv[i], yv[i]);
+//        }
+//        series.add(AXISXMAX, AXISYMAX + 1);
+//
+//    }
 
     /**
      * 更新图标信息
      */
     private void updateChart() {
-
-        // 自动放大缩小Y轴的算法
-
-
-        /*if (brightvalue == YMAX || brightvalue == YMIN) {
-            ignoreNum = 50;
-        } else {
-            ignoreNum--;
-        }
-        if (ignoreNum <= 0&&brightvalue!=0) {
-            waveMin = Math.min(waveMin, brightvalue);
-            waveMax = Math.max(waveMax, brightvalue);
-            detaMax = YMAX - waveMax;
-            detaMin = waveMin - YMIN;
-            deta = waveMax - waveMin;
-            if (detaMax > deta / 2) {
-                YMAX -= deta / 3;
-            }
-            if (detaMin > deta / 2) {
-                YMIN += deta / 3;
-            }
-            if (lastYMAX != YMAX) {
-                renderer.setYAxisMax(YMAX);
-            }
-            if (lastYMIN != YMIN) {
-                renderer.setYAxisMin(YMIN);
-            }
-            lastYMAX = YMAX;
-            lastYMIN = YMIN;
-            Log.i("info","YMAX:"+YMAX+" YMIN:"+YMIN+" lastYMAX:"+lastYMAX+" lastMIN:"+lastYMIN+
-                    " waveMax:"+ waveMax +" waveMin:"+ waveMin +" ignoreNum:"+ignoreNum+" brightvalue:"+brightvalue );
-        }*/
 
 
         //设置好下一个需要增加的节点
@@ -352,78 +359,122 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         // 数据有效则添加，无效则清空数据集
         // 另外R通道平均值在5.4以上
-        if (brightvalue < AXISYMAX && brightvalue > AXISYMIN&&redvalue>5.4) {
+        if (brightvalue < AXISYMAX && brightvalue > AXISYMIN && redvalue > 5.4) {
+            count++;
             addX = AXISXMAX;
             addY = brightvalue;
             // 把数据添加到mDatas中，用来保存到文件中
-            mDatas.add(brightvalue);
-            count++;
-            // 如果有效数据采集到300个，就跳转到保存数据的界面
-            if (count >= 1000) {
-
-//                Constants.datas=mDatas;
-                Intent intent = new Intent(MainActivity.this, SaveDateActivity.class);
-                Bundle bundle = new Bundle();
-                UserDataBean userDataBean = new UserDataBean();
-                userDataBean.setDatas(mDatas);
-                bundle.putSerializable("userdatabean", userDataBean);
-                intent.putExtras(bundle);
-                handler = null;
-                startActivity(intent);
+            if (count >= 10) {
+                mDatas.add(brightvalue);
+                mRedDatas.add(redvalue);
+                mGreenDatas.add(greenvalue);
+                mBlueDatas.add(bluevalue);
 
 
-            }
-            //将旧的点集中x和y的数值取出来放入backup中，并且将x的值减1，造成曲线向左平移的效果
+                // 如果有效数据采集到300个，就跳转到保存数据的界面
+//                if (count >= 100) {
+                if (count >= 3 * AXISXMAX) {
 
-            if (length > AXISXMAX) {
-                for (int i = 1; i < length; i++) {
-                    xv[i - 1] = (int) series.getX(i) - 1;
-                    yv[i - 1] = series.getY(i);
+                    UserDataBean userDataBean = new UserDataBean();
+                    userDataBean.setDatas(mDatas);
+                    handler = null;
+                    timer.cancel();
+
+                    for (int i = 0; i < 10; i++) {
+                        int index = mRedDatas.size() - 1;
+                        mRedDatas.remove(index);
+                        mGreenDatas.remove(index);
+                        mBlueDatas.remove(index);
+                    }
+
+                    for (int i = 0; i < 40; i++) {
+                        mRedDatas.remove(0);
+                        mGreenDatas.remove(0);
+                        mBlueDatas.remove(0);
+                    }
+
+                    userDataBean.setRed_datas(mRedDatas);
+                    userDataBean.setGreen_datas(mGreenDatas);
+                    userDataBean.setBlue_datas(mBlueDatas);
+
+                    // 以下是计算心率和RR间隔的代码
+                    // 将源数据List转成数组
+                    List<Double> data_origin_list = userDataBean.getDatas();
+                    double[] data_origin = new double[data_origin_list.size()];
+                    for (int i = 0; i < data_origin_list.size(); i++) {
+                        data_origin[i] = data_origin_list.get(i);
+                    }
+                    double[] data_smoothed = new double[data_origin_list.size()];
+
+                    // SG算法的参数矩阵
+                    double[] coeffs = SGFilter.computeSGCoefficients(5, 5, 5);
+                    // SG算法去噪处理
+                    data_smoothed = new SGFilter(5, 5).smooth(data_origin, coeffs);
+                    // SG算法去噪处理第二遍
+                    data_smoothed = new SGFilter(5, 5).smooth(data_smoothed, coeffs);
+                    data_smoothed = new SGFilter(5, 5).smooth(data_smoothed, coeffs);
+                    data_smoothed = new SGFilter(5, 5).smooth(data_smoothed, coeffs);
+
+                    // data_smoothed_list为SG算法处理前的值列表（去头去尾）
+                    List<Double> data_origin_list2 = new ArrayList<Double>();
+                    // data_smoothed_list为SG算法处理后的值列表（去头去尾）
+                    List<Double> data_smoothed_list = new ArrayList<Double>();
+                    for (int i = 40; i < data_smoothed.length - 10; i++) {
+                        data_origin_list2.add(data_origin[i]);
+                        data_smoothed_list.add(data_smoothed[i]);
+                    }
+                    Log.i("data_smoothed.length", data_smoothed.length + "");
+                    System.out.println(data_origin_list2);
+//                    System.out.println(data_smoothed_list);
+                    // peaksList为峰的横坐标列表
+                    List<Integer> peaksList = CalculateHeartRate.findPeaks(data_smoothed_list);
+                    int heartRate = CalculateHeartRate.calHeartRate(peaksList, INTERVAL);
+                    userDataBean.setHeartrate(heartRate);
+                    Log.i("heart rate", heartRate + "");
+                    Toast.makeText(MainActivity.this, "心率为" + heartRate, Toast.LENGTH_LONG).show();
+
+                    userDataBean.setRr_datas(CalculateHeartRate.calRRInteval(peaksList));
+                    System.out.println(userDataBean.getRr_datas());
+                    userDataBean.setNew_datas(data_smoothed_list);
+                    System.out.println(userDataBean.getNew_datas());
+
+                    userDataBean.setDatas(data_origin_list2);
+                    Intent intent = new Intent(MainActivity.this, SaveDateActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("userdatabean", userDataBean);
+                    intent.putExtras(bundle);
+
+                    startActivity(intent);
                 }
-                length = AXISXMAX;
-            } else {
-                for (int i = 0; i < length; i++) {
-                    xv[i] = (int) series.getX(i) - 1;
-                    yv[i] = series.getY(i);
-                    Log.i("xv yv", xv[i] + " " + yv[i] + " " + i + " " + length);
-                }
-            }
+                //将旧的点集中x和y的数值取出来放入backup中，并且将x的值减1，造成曲线向左平移的效果
 
-            // 清空series中的坐标点
-            series.clear();
-            //将新产生的点首先加入到点集中，然后在循环体中将坐标变换后的一系列点都重新加入到点集中
-            for (int k = 0; k < length; k++) {
-                series.add(xv[k], yv[k]);
+                if (length > AXISXMAX) {
+                    for (int i = 1; i < length; i++) {
+                        xv[i - 1] = (int) series.getX(i) - 1;
+                        yv[i - 1] = series.getY(i);
+                    }
+                    length = AXISXMAX;
+                } else {
+                    for (int i = 0; i < length; i++) {
+                        xv[i] = (int) series.getX(i) - 1;
+                        yv[i] = series.getY(i);
+//                    Log.i("xv yv", xv[i] + " " + yv[i] + " " + i + " " + length);
+                    }
+                }
+
+                // 清空series中的坐标点
+                series.clear();
+                //将新产生的点首先加入到点集中，然后在循环体中将坐标变换后的一系列点都重新加入到点集中
+                for (int k = 0; k < length; k++) {
+                    series.add(xv[k], yv[k]);
 //            Log.i("series item", series.getX(k) + " " + series.getY(k) + " " + length + " " + k);
-            }
-            series.add(addX, addY);
-            Log.i("new add point", addY + "");
+                }
+                series.add(addX, addY);
+//            Log.i("new add point", addY + "");
 
-            // 自动调整Y轴阈值算法
-            if (series.getMaxY()>0&&series.getMinY()<100)
-            {
-                YMAX = series.getMaxY();
-                YMIN = series.getMinY();
+                // 自动调整Y轴阈值算法
+                autoYthreshold();
             }
-//            Log.i("max min ",YMAX+" "+YMIN);
-
-            if (currentYtop - YMAX < 0.01) {
-                currentYtop += 0.01;
-                renderer.setYAxisMax(currentYtop);
-            } else if (currentYtop - YMAX > 0.04) {
-                currentYtop -= 0.01;
-                renderer.setYAxisMax(currentYtop);
-            }
-
-            if (YMIN - currentYbottom > 0.04) {
-                currentYbottom += 0.01;
-                renderer.setYAxisMin(currentYbottom);
-            } else if (YMIN - currentYbottom < 0.01) {
-                currentYbottom -= 0.01;
-                renderer.setYAxisMin(currentYbottom);
-            }
-//            Log.i("Ytop Ybottom",currentYtop+" "+currentYbottom);
-
         } else {
             count = 0;
             mDatas.clear();
@@ -431,12 +482,42 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         //这里可以试验一下把顺序颠倒过来是什么效果，即先运行循环体，再添加新产生的点
         //在数据集中添加新的点集
+
         mDataset.addSeries(series);
         //视图更新，没有这一步，曲线不会呈现动态
         //如果在非UI主线程中，需要调用postInvalidate()，具体参考api
         chart.invalidate();
+        Log.i("updateChart","在更新"+series.getItemCount());
 
 
+    }
+
+    /**
+     * 自动调整Y轴阈值的算法
+     */
+    private void autoYthreshold() {
+        if (series.getMaxY() > 0 && series.getMinY() < 100) {
+            YMAX = series.getMaxY();
+            YMIN = series.getMinY();
+        }
+//            Log.i("max min ",YMAX+" "+YMIN);
+
+        if (currentYtop - YMAX < 0.035) {
+            currentYtop += 0.01;
+            renderer.setYAxisMax(currentYtop);
+        } else if (currentYtop - YMAX > 0.045) {
+            currentYtop -= 0.01;
+            renderer.setYAxisMax(currentYtop);
+        }
+
+        if (YMIN - currentYbottom > 0.045) {
+            currentYbottom += 0.01;
+            renderer.setYAxisMin(currentYbottom);
+        } else if (YMIN - currentYbottom < 0.035) {
+            currentYbottom -= 0.01;
+            renderer.setYAxisMin(currentYbottom);
+        }
+        Log.i("Ytop Ybottom",currentYtop+" "+currentYbottom);
     }
 
 
@@ -482,8 +563,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
             int height = size.height;
             //图像处理
             double[] imgAvg = ImageProcessing.decodeYUV420SPtoRedAvg(data.clone(), height, width);
-            redvalue=imgAvg[0];
-            brightvalue =imgAvg[1];
+            brightvalue = imgAvg[0];
+            redvalue = imgAvg[1];
+            greenvalue = imgAvg[2];
+            bluevalue = imgAvg[3];
 
 
             text1.setText("平均像素值是" + brightvalue);
@@ -533,7 +616,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             if (totalTimeInSecs >= 2) {
                 double bps = (beats / totalTimeInSecs);
                 int dpm = (int) (bps * 60d);
-                if (dpm < 30 || dpm > 180 ) {
+                if (dpm < 30 || dpm > 180) {
                     //获取系统开始时间（ms）
                     startTime = System.currentTimeMillis();
                     //beats心跳总数
@@ -617,7 +700,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         List<Camera.Size> cameralist = parameters.getSupportedPreviewSizes();
 
         for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
-            Log.i("camera size", size.width + ":" + size.height);
+//            Log.i("camera size", size.width + ":" + size.height);
             if (size.width <= width && size.height <= height) {
                 if (result == null) {
                     result = size;

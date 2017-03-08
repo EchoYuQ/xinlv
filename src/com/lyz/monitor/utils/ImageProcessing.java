@@ -18,13 +18,15 @@ public abstract class ImageProcessing {
      * @return
      */
     private static int[] decodeYUV420SPtoRedSum(byte[] yuv420sp, int width, int height) {
-        int[] res = new int[]{0, 0};
+        int[] res = new int[]{0, 0, 0, 0};
         if (yuv420sp == null)
             return res;
         final int frameSize = width * height;
-        // sum为红色通道，sum1为灰度
+        // sum为灰度，sum1为红色通道，sum2为绿色通道，sum3为蓝色通道
         int sum = 0;
         int sum1 = 0;
+        int sum2 = 0;
+        int sum3 = 0;
         // 计算红色通道的平均值算法。
         for (int j = 0, yp = 0; j < height; j++) {
             int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
@@ -59,10 +61,12 @@ public abstract class ImageProcessing {
                 int red = (pixel >> 16) & 0xff;
                 int green = (pixel >> 8) & 0xff;
                 int blue = pixel & 0xff;
-                sum += red;
+                sum1 += red;
+                sum2 += green;
+                sum3 += blue;
 
                 int temp = (int) (0.229 * red + 0.587 * green + 0.114 * blue);
-                sum1 += temp;
+                sum += temp;
 
             }
 
@@ -79,6 +83,8 @@ public abstract class ImageProcessing {
 //        Log.i("value sum", sum + "");
         res[0] = sum;
         res[1] = sum1;
+        res[2] = sum2;
+        res[3] = sum3;
         return res;
     }
 
@@ -91,13 +97,15 @@ public abstract class ImageProcessing {
      * @return res[0]为红色通道，res[1]为灰度
      */
     public static double[] decodeYUV420SPtoRedAvg(byte[] yuv420sp, int width, int height) {
-        double[] res=new double[]{0,0};
+        double[] res = new double[]{0, 0, 0, 0};
         if (yuv420sp == null)
             return res;
         final int frameSize = width * height;
         int[] sum = decodeYUV420SPtoRedSum(yuv420sp, width, height);
         res[0] = Math.log((double) sum[0] / (double) frameSize);
         res[1] = Math.log((double) sum[1] / (double) frameSize);
+        res[2] = Math.log((double) sum[2] / (double) frameSize);
+        res[3] = Math.log((double) sum[3] / (double) frameSize);
 //        Log.i("average value", aver + "");
 //        Log.i("framesize",width+":"+height);
         return res;
