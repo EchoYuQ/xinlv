@@ -4,31 +4,44 @@
     api-level="23"
     density="xxhdpi"
     format="7"
-    timestamp="4410117074858596" >
+    timestamp="205883519991087" >
 
     <task
         name="javac"
-        duration="0" />
+        duration="306" />
     <task
         name="instant-run-dex"
         duration="0" />
     <task
         name="instant-run-transform"
-        duration="0" />
+        duration="22" />
     <task
         name="verifier"
-        duration="0" />
+        duration="5" />
 
-    <build timestamp="4409957903287030" >
-        <artifact
-            location="H:\AndroidWorkSpace3\xinlv\build\outputs\apk\xinlv-debug.apk"
-            type="MAIN" />
-    </build>
-    <build timestamp="4410091072490251" >
+    <artifact
+        location="H:\AndroidWorkSpace3\xinlv\build\intermediates\transforms\dex\debug\folders\1000\5\slice_7\classes.dex"
+        type="DEX" />
+
+    <build timestamp="203304977669220" >
         <artifact
             location="H:\AndroidWorkSpace3\xinlv\build\intermediates\transforms\dex\debug\folders\1000\5\slice_4\classes.dex"
             type="DEX" />
     </build>
-    <build timestamp="4410117074858596" />
+    <build timestamp="205496248668501" >
+        <artifact
+            location="H:\AndroidWorkSpace3\xinlv\build\intermediates\transforms\dex\debug\folders\1000\5\slice_4\classes.dex"
+            type="DEX" />
+    </build>
+    <build timestamp="205883519991087" >
+        <artifact
+            location="H:\AndroidWorkSpace3\xinlv\build\intermediates\transforms\dex\debug\folders\1000\5\slice_7\classes.dex"
+            type="DEX" />
+    </build>
+    <build timestamp="4494929525055787" >
+        <artifact
+            location="H:\AndroidWorkSpace3\xinlv\build\outputs\apk\xinlv-debug.apk"
+            type="MAIN" />
+    </build>
 
 </instant-run>

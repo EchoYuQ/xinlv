@@ -105,8 +105,9 @@ public abstract class ImageProcessing {
         res[0] = Math.log((double) sum[0] / (double) frameSize);
         res[1] = Math.log((double) sum[1] / (double) frameSize);
         res[2] = Math.log((double) sum[2] / (double) frameSize);
-        res[3] = Math.log((double) sum[3] / (double) frameSize);
-//        Log.i("average value", aver + "");
+        res[3] = (double) sum[3] / (double) frameSize;
+        double red=(double) sum[1] / (double) frameSize;
+        Log.i("red average value", red + "");
 //        Log.i("framesize",width+":"+height);
         return res;
     }

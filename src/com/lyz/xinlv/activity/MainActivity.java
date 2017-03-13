@@ -1,25 +1,10 @@
 package com.lyz.xinlv.activity;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.achartengine.ChartFactory;
-import org.achartengine.GraphicalView;
-import org.achartengine.chart.PointStyle;
-import org.achartengine.model.XYMultipleSeriesDataset;
-import org.achartengine.model.XYSeries;
-import org.achartengine.renderer.XYMultipleSeriesRenderer;
-import org.achartengine.renderer.XYSeriesRenderer;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.Paint.Align;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
@@ -29,10 +14,10 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,15 +26,33 @@ import com.lyz.Bean.UserDataBean;
 import com.lyz.SG.SGFilter;
 import com.lyz.monitor.utils.CalculateHeartRate;
 import com.lyz.monitor.utils.ImageProcessing;
+import com.lyz.ui.MySurfaceView;
+import com.lyz.ui.ProgressWheel;
+import com.lyz.ui.TwinkleDrawable;
+
+import org.achartengine.ChartFactory;
+import org.achartengine.GraphicalView;
+import org.achartengine.chart.PointStyle;
+import org.achartengine.model.XYMultipleSeriesDataset;
+import org.achartengine.model.XYSeries;
+import org.achartengine.renderer.XYMultipleSeriesRenderer;
+import org.achartengine.renderer.XYSeriesRenderer;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 程序的主入口
  *
  * @author liuyazhuang
  */
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity {
     //曲线
-    private Timer timer ;
+    private Timer timer;
     //Timer任务，与Timer配套使用
     private TimerTask task;
 
@@ -63,6 +66,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private static double flag = 1;
     private Handler handler = null;
+    private Handler mRealTimeHandler = null;
     private String title = "pulse";
     private XYSeries series;
     private XYMultipleSeriesDataset mDataset;
@@ -75,6 +79,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private double minY;
     private int t = 0;
 
+    // 用于计算实时心率的数据
+    List<Double> mRealTimeDatas = new ArrayList<Double>();
+
 
     int[] xv = new int[AXISXMAX];
     double[] yv = new double[AXISXMAX];
@@ -82,16 +89,25 @@ public class MainActivity extends Activity implements View.OnClickListener {
     //	private static final String TAG = "HeartRateMonitor";
     private static final AtomicBoolean processing = new AtomicBoolean(false);
     //Android手机预览控件
-    private static SurfaceView preview = null;
+    private static MySurfaceView preview = null;
     //预览设置信息
     private static SurfaceHolder previewHolder = null;
     //Android手机相机句柄
     private static Camera camera = null;
-    //private static View image = null;
-    private static TextView text = null;
-    private static TextView text1 = null;
-    private static TextView text2 = null;
+
     private static WakeLock wakeLock = null;
+    // 心率数值显示
+    private TextView m_TvLabel;
+    // 心跳的ImageView
+    private ImageView m_IvHeart;
+    // 心跳的动画
+    private TwinkleDrawable m_HeartDrawable;
+    // 心跳动画是否在播放的标志位
+    private boolean mIsHeartAnimPlaying = false;
+    // 最外圈的圆形进度条
+    private ProgressWheel m_ProgressWheel;
+
+
     private static int averageIndex = 0;
     private static final int averageArraySize = 4;
     private static final int[] averageArray = new int[averageArraySize];
@@ -112,6 +128,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private int count;
     private double currentYtop = AXISYMAX;
     private double currentYbottom = AXISYMIN;
+    private int mRealTimeHeartRate = 0;
+    private int mHeartRate;
+
+    private boolean mIsHeartRateCanSet=true;
 
 
     /**
@@ -145,25 +165,73 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        initView();
         initConfig();
         super.onCreate(savedInstanceState);
     }
 
+    private void initView() {
+        m_TvLabel = (TextView) findViewById(R.id.tv_data_measure);
+        m_IvHeart = (ImageView) findViewById(R.id.iv_heart_measure);
+
+        m_HeartDrawable = new TwinkleDrawable(m_IvHeart);
+        m_HeartDrawable.addDrawable(getResources().getDrawable(R.drawable.ic_heart_big), true);
+        m_HeartDrawable.addDrawable(getResources().getDrawable(R.drawable.ic_heart_small), false);
+
+        m_ProgressWheel = (ProgressWheel) findViewById(R.id.pw_heartrate);
+        m_ProgressWheel.setMax(2*AXISXMAX-10);
+    }
+
+
+    private void calRealTimeHeartRate() {
+        int size = mRealTimeDatas.size();
+        double[] realtime_data_origin = new double[size];
+        for (int i = 0; i < size; i++) {
+            realtime_data_origin[i] = mRealTimeDatas.get(i);
+        }
+
+        // SG算法的参数矩阵
+        double[] coeffs = SGFilter.computeSGCoefficients(3, 3, 5);
+        // SG算法去噪处理
+        double[] realtime_data_smoothed = new SGFilter(3, 3).smooth(realtime_data_origin, coeffs);
+        // SG算法去噪处理第二遍
+        realtime_data_smoothed = new SGFilter(3, 3).smooth(realtime_data_smoothed, coeffs);
+
+
+        List<Double> realtime_data_smoothed_list = new ArrayList<Double>();
+        // 去头去尾
+        for (int i = 5; i < realtime_data_smoothed.length-5; i++) {
+            realtime_data_smoothed_list.add(realtime_data_smoothed[i]);
+        }
+        System.out.println("实时心率去噪数据");
+        System.out.println(realtime_data_smoothed_list);
+        // peaksList为峰的横坐标列表
+        List<Integer> peaksList = CalculateHeartRate.findPeaks(realtime_data_smoothed_list);
+        System.out.println("实时心率RR间隔");
+        System.out.println(CalculateHeartRate.calRRInteval(peaksList));
+        mRealTimeHeartRate = CalculateHeartRate.calHeartRate(peaksList, INTERVAL);
+        Log.i("real time heartRate", mRealTimeHeartRate + "");
+    }
+
     @Override
     protected void onStart() {
-        count=0;
-        handler=null;
+        count = 0;
+        handler = null;
         mDatas.clear();
         mRedDatas.clear();
         mGreenDatas.clear();
         mBlueDatas.clear();
-        timer=null;
-        task=null;
+        mRealTimeDatas.clear();
+        timer = null;
+        task = null;
+        m_ProgressWheel.setProgress(0);
+//        mIsHeartRateCanSet=true;
 
         initTimer();
-        Log.i("onStart","onStart()");
+        Log.i("onStart", "onStart()");
         super.onStart();
     }
+
 
     @Override
     protected void onStop() {
@@ -208,14 +276,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
         //这里的Handler实例将配合下面的Timer实例，完成定时更新图表的功能
 
         //获取SurfaceView控件
-        preview = (SurfaceView) findViewById(R.id.preview);
+        preview = (MySurfaceView) findViewById(R.id.preview);
         previewHolder = preview.getHolder();
-        previewHolder.addCallback(surfaceCallback);
         previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        //		image = findViewById(R.id.image);
-        text = (TextView) findViewById(R.id.text);
-        text1 = (TextView) findViewById(R.id.text1);
-        text2 = (TextView) findViewById(R.id.text2);
+//        previewHolder.addCallback(preview);
+        previewHolder.addCallback(surfaceCallback);
+
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
     }
@@ -229,7 +295,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 @Override
                 public void handleMessage(Message msg) {
                     //        		刷新图表
-                    updateChart();
+                    if (msg.what == 1) updateChart();
                     super.handleMessage(msg);
                 }
             };
@@ -247,8 +313,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 }
             }
         };
-        timer=new Timer();
-        timer.schedule(task, 100, INTERVAL);           //曲线
+        timer = new Timer();
+        timer.schedule(task, 100, INTERVAL);
     }
 
     //	曲线
@@ -259,12 +325,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onDestroy();
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-
-        }
-    }
 
     /**
      * 创建图表
@@ -320,7 +380,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         renderer.setClickEnabled(false);
         renderer.setShowAxes(false);
         renderer.setShowLabels(false);
-        renderer.setMargins(new int[]{0,0,0,0});
+        renderer.setMargins(new int[]{0, 0, 0, 0});
 //        renderer.setPanEnabled(false, false);
 //        renderer.setZoomEnabled(false, false);
         Log.i("clickable", renderer.isClickEnabled() + "");
@@ -330,21 +390,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
 
-//    /**
-//     * 数据缓存器的初始化
-//     */
-//    private void initValueBuffer() {
-//        for (int i = 0; i < AXISXMAX; i++) {
-//            xv[i] = i;
-//            yv[i] = AXISYMAX + 1;
-//            series.add(xv[i], yv[i]);
-//        }
-//        series.add(AXISXMAX, AXISYMAX + 1);
-//
-//    }
-
     /**
-     * 更新图标信息
+     * 更新图表信息
      */
     private void updateChart() {
 
@@ -365,6 +412,38 @@ public class MainActivity extends Activity implements View.OnClickListener {
             addY = brightvalue;
             // 把数据添加到mDatas中，用来保存到文件中
             if (count >= 10) {
+                // 测试数值显示和心跳动画用
+//
+                if (!mIsHeartAnimPlaying) {
+                    m_HeartDrawable.startTwinkle();
+                    mIsHeartAnimPlaying = true;
+                }
+                m_ProgressWheel.setProgress(count-10);
+
+                // 测试实时心率计算
+                mRealTimeDatas.add(brightvalue);
+                int n = mRealTimeDatas.size();
+                if (n > 30 && n % 10 == 0) {
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            calRealTimeHeartRate();
+                        }
+                    });
+                    thread.start();
+                }
+                if (count==10)
+                {
+                    mIsHeartRateCanSet=true;
+                    mRealTimeHeartRate=mHeartRate;
+                }
+                if (mIsHeartRateCanSet)
+                {
+                    m_TvLabel.setText(mRealTimeHeartRate + "");
+                    Log.i("m_TvLabel","设了一次实时心率值");
+
+                }
+
                 mDatas.add(brightvalue);
                 mRedDatas.add(redvalue);
                 mGreenDatas.add(greenvalue);
@@ -373,12 +452,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
                 // 如果有效数据采集到300个，就跳转到保存数据的界面
 //                if (count >= 100) {
-                if (count >= 3 * AXISXMAX) {
+                if (count >= 2 * AXISXMAX) {
+
 
                     UserDataBean userDataBean = new UserDataBean();
                     userDataBean.setDatas(mDatas);
-                    handler = null;
+                    handler.removeCallbacksAndMessages(null);
+                    handler= null;
                     timer.cancel();
+                    mIsHeartRateCanSet=false;
 
                     for (int i = 0; i < 10; i++) {
                         int index = mRedDatas.size() - 1;
@@ -428,10 +510,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
 //                    System.out.println(data_smoothed_list);
                     // peaksList为峰的横坐标列表
                     List<Integer> peaksList = CalculateHeartRate.findPeaks(data_smoothed_list);
-                    int heartRate = CalculateHeartRate.calHeartRate(peaksList, INTERVAL);
-                    userDataBean.setHeartrate(heartRate);
-                    Log.i("heart rate", heartRate + "");
-                    Toast.makeText(MainActivity.this, "心率为" + heartRate, Toast.LENGTH_LONG).show();
+                    mHeartRate = CalculateHeartRate.calHeartRate(peaksList, INTERVAL);
+                    userDataBean.setHeartrate(mHeartRate);
+                    Log.i("heart rate", mHeartRate + "");
+                    m_TvLabel.setText(mHeartRate+"");
+                    Toast.makeText(MainActivity.this, "心率为" + mHeartRate, Toast.LENGTH_LONG).show();
 
                     userDataBean.setRr_datas(CalculateHeartRate.calRRInteval(peaksList));
                     System.out.println(userDataBean.getRr_datas());
@@ -443,51 +526,63 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("userdatabean", userDataBean);
                     intent.putExtras(bundle);
-
                     startActivity(intent);
-                }
-                //将旧的点集中x和y的数值取出来放入backup中，并且将x的值减1，造成曲线向左平移的效果
-
-                if (length > AXISXMAX) {
-                    for (int i = 1; i < length; i++) {
-                        xv[i - 1] = (int) series.getX(i) - 1;
-                        yv[i - 1] = series.getY(i);
-                    }
-                    length = AXISXMAX;
                 } else {
-                    for (int i = 0; i < length; i++) {
-                        xv[i] = (int) series.getX(i) - 1;
-                        yv[i] = series.getY(i);
-//                    Log.i("xv yv", xv[i] + " " + yv[i] + " " + i + " " + length);
-                    }
-                }
+                    //将旧的点集中x和y的数值取出来放入backup中，并且将x的值减1，造成曲线向左平移的效果
 
-                // 清空series中的坐标点
-                series.clear();
-                //将新产生的点首先加入到点集中，然后在循环体中将坐标变换后的一系列点都重新加入到点集中
-                for (int k = 0; k < length; k++) {
-                    series.add(xv[k], yv[k]);
+                    if (length > AXISXMAX) {
+                        for (int i = 1; i < length; i++) {
+                            xv[i - 1] = (int) series.getX(i) - 1;
+                            yv[i - 1] = series.getY(i);
+                        }
+                        length = AXISXMAX;
+                    } else {
+                        for (int i = 0; i < length; i++) {
+                            xv[i] = (int) series.getX(i) - 1;
+                            yv[i] = series.getY(i);
+//                    Log.i("xv yv", xv[i] + " " + yv[i] + " " + i + " " + length);
+                        }
+                    }
+
+                    // 清空series中的坐标点
+                    series.clear();
+                    //将新产生的点首先加入到点集中，然后在循环体中将坐标变换后的一系列点都重新加入到点集中
+                    for (int k = 0; k < length; k++) {
+                        series.add(xv[k], yv[k]);
 //            Log.i("series item", series.getX(k) + " " + series.getY(k) + " " + length + " " + k);
-                }
-                series.add(addX, addY);
+                    }
+                    series.add(addX, addY);
 //            Log.i("new add point", addY + "");
 
-                // 自动调整Y轴阈值算法
-                autoYthreshold();
+                    // 自动调整Y轴阈值算法
+                    autoYthreshold();
+
+                    //这里可以试验一下把顺序颠倒过来是什么效果，即先运行循环体，再添加新产生的点
+                    //在数据集中添加新的点集
+
+                    mDataset.addSeries(series);
+                    //视图更新，没有这一步，曲线不会呈现动态
+                    //如果在非UI主线程中，需要调用postInvalidate()，具体参考api
+                    chart.invalidate();
+
+                }
+
             }
         } else {
+            if (mIsHeartAnimPlaying) {
+                m_HeartDrawable.stopTwinkle();
+                mIsHeartAnimPlaying = false;
+            }
             count = 0;
             mDatas.clear();
+            mRealTimeDatas.clear();
+            mGreenDatas.clear();
+            mRedDatas.clear();
+            mBlueDatas.clear();
+            m_ProgressWheel.setProgress(0);
             series.clear();
         }
-        //这里可以试验一下把顺序颠倒过来是什么效果，即先运行循环体，再添加新产生的点
-        //在数据集中添加新的点集
 
-        mDataset.addSeries(series);
-        //视图更新，没有这一步，曲线不会呈现动态
-        //如果在非UI主线程中，需要调用postInvalidate()，具体参考api
-        chart.invalidate();
-        Log.i("updateChart","在更新"+series.getItemCount());
 
 
     }
@@ -517,7 +612,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             currentYbottom -= 0.01;
             renderer.setYAxisMin(currentYbottom);
         }
-        Log.i("Ytop Ybottom",currentYtop+" "+currentYbottom);
+        Log.i("Ytop Ybottom", currentYtop + " " + currentYbottom);
     }
 
 
@@ -532,6 +627,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         wakeLock.acquire();
         camera = Camera.open();
         startTime = System.currentTimeMillis();
+//        mIsHeartRateCanSet=true;
     }
 
     @Override
@@ -569,84 +665,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
             bluevalue = imgAvg[3];
 
 
-            text1.setText("平均像素值是" + brightvalue);
-            //像素平均值imgAvg,日志
-            //Log.i(TAG, "imgAvg=" + imgAvg);
-            if (imgAvg[1] == 0 || imgAvg[1] == 255) {
-                processing.set(false);
-                return;
-            }
-            //计算平均值
-            int averageArrayAvg = 0;
-            int averageArrayCnt = 0;
-            for (int i = 0; i < averageArray.length; i++) {
-                if (averageArray[i] > 0) {
-                    averageArrayAvg += averageArray[i];
-                    averageArrayCnt++;
-                }
-            }
-            //计算平均值
-            int rollingAverage = (averageArrayCnt > 0) ? (averageArrayAvg / averageArrayCnt) : 0;
-            TYPE newType = currentType;
-//            if (imgAvg < rollingAverage) {
-//                newType = TYPE.RED;
-//                if (newType != currentType) {
-//                    beats++;
-//                    flag = 0;
-//                    text2.setText("脉冲数是" + String.valueOf(beats));
-//                    //Log.e(TAG, "BEAT!! beats=" + beats);
-//                }
-//            } else if (imgAvg > rollingAverage) {
-//                newType = TYPE.GREEN;
-//            }
-
-            if (averageIndex == averageArraySize)
-                averageIndex = 0;
-            averageArray[averageIndex] = 1;// 需修改
-            averageIndex++;
-
-            // Transitioned from one state to another to the same
-            if (newType != currentType) {
-                currentType = newType;
-                //image.postInvalidate();
-            }
-            //获取系统结束时间（ms）
-            long endTime = System.currentTimeMillis();
-            double totalTimeInSecs = (endTime - startTime) / 1000d;
-            if (totalTimeInSecs >= 2) {
-                double bps = (beats / totalTimeInSecs);
-                int dpm = (int) (bps * 60d);
-                if (dpm < 30 || dpm > 180) {
-                    //获取系统开始时间（ms）
-                    startTime = System.currentTimeMillis();
-                    //beats心跳总数
-                    beats = 0;
-                    processing.set(false);
-                    return;
-                }
-                //Log.e(TAG, "totalTimeInSecs=" + totalTimeInSecs + " beats="+ beats);
-                if (beatsIndex == beatsArraySize)
-                    beatsIndex = 0;
-                beatsArray[beatsIndex] = dpm;
-                beatsIndex++;
-                int beatsArrayAvg = 0;
-                int beatsArrayCnt = 0;
-                for (int i = 0; i < beatsArray.length; i++) {
-                    if (beatsArray[i] > 0) {
-                        beatsArrayAvg += beatsArray[i];
-                        beatsArrayCnt++;
-                    }
-                }
-                int beatsAvg = (beatsArrayAvg / beatsArrayCnt);
-                text.setText("您的的心率是" + String.valueOf(beatsAvg) + "  zhi:" + String.valueOf(beatsArray.length)
-                        + "    " + String.valueOf(beatsIndex) + "    " + String.valueOf(beatsArrayAvg) + "    " + String.valueOf(beatsArrayCnt));
-                //获取系统时间（ms）
-                startTime = System.currentTimeMillis();
-                beats = 0;
-            }
             processing.set(false);
         }
     };
+
 
     /**
      * 预览回调接口
@@ -656,8 +678,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             try {
-                camera.setPreviewDisplay(previewHolder);
+
+                camera = Camera.open();
+                try {
+                    camera.setPreviewDisplay(previewHolder);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                // 设预览回调
                 camera.setPreviewCallback(previewCallback);
+//
+//                camera.setPreviewDisplay(previewHolder);
+
+                //启动摄像头预览
+                camera.startPreview();
             } catch (Throwable t) {
                 Log.e("PreviewDemo", "Exception in setPreviewDisplay()", t);
             }
@@ -666,17 +702,21 @@ public class MainActivity extends Activity implements View.OnClickListener {
         //当预览改变的时候回调此方法
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
             Camera.Parameters parameters = camera.getParameters();
             parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-            Camera.Size size = getSmallestPreviewSize(width, height, parameters);
-//            size.width = 480;
-//            size.height = 360;
-            if (size != null) {
-                parameters.setPreviewSize(size.width, size.height);
-                //				Log.d(TAG, "Using width=" + size.width + " height="	+ size.height);
-            }
+            // 旋转90度
+            camera.setDisplayOrientation(90);
+            parameters.setRotation(90);
             camera.setParameters(parameters);
-            camera.startPreview();
+//            Camera.Size size = getSmallestPreviewSize(width, height, parameters);
+////            size.width = 480;
+////            size.height = 360;
+//            if (size != null) {
+//                parameters.setPreviewSize(size.width, size.height);
+//                //				Log.d(TAG, "Using width=" + size.width + " height="	+ size.height);
+//            }
+
         }
 
         //销毁的时候调用

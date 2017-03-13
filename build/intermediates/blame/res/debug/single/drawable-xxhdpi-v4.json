@@ -1,6 +1,26 @@
 [
     {
+        "merged": "H:\\AndroidWorkSpace3\\xinlv\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v4\\ic_line.png",
+        "source": "H:\\AndroidWorkSpace3\\xinlv\\res\\drawable-xxhdpi\\ic_line.png"
+    },
+    {
+        "merged": "H:\\AndroidWorkSpace3\\xinlv\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v4\\ic_menu_settings.png",
+        "source": "H:\\AndroidWorkSpace3\\xinlv\\res\\drawable-xxhdpi\\ic_menu_settings.png"
+    },
+    {
+        "merged": "H:\\AndroidWorkSpace3\\xinlv\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v4\\ic_icon_start.png",
+        "source": "H:\\AndroidWorkSpace3\\xinlv\\res\\drawable-xxhdpi\\ic_icon_start.png"
+    },
+    {
+        "merged": "H:\\AndroidWorkSpace3\\xinlv\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v4\\ic_background.png",
+        "source": "H:\\AndroidWorkSpace3\\xinlv\\res\\drawable-xxhdpi\\ic_background.png"
+    },
+    {
         "merged": "H:\\AndroidWorkSpace3\\xinlv\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v4\\ic_launcher.png",
         "source": "H:\\AndroidWorkSpace3\\xinlv\\res\\drawable-xxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "H:\\AndroidWorkSpace3\\xinlv\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v4\\ic_oval.png",
+        "source": "H:\\AndroidWorkSpace3\\xinlv\\res\\drawable-xxhdpi\\ic_oval.png"
     }
 ]

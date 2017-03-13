@@ -18,7 +18,7 @@ public class CalculateHeartRate {
     {
         List<Integer> list=new ArrayList<Integer>();
         int length=datas.length;
-        for(int i=1;i<length-1;i++)
+        for(int i=1;i<length-4;i++)
         {
             if(datas[i]>datas[i-1]&&datas[i]>datas[i+1])
             {
@@ -26,6 +26,11 @@ public class CalculateHeartRate {
                 {
                     if(datas[i]>datas[i+2])
                     {
+//                        if(calDiff(datas[i-2],datas[i-1],datas[i+1],datas[i+2])<0)
+//                        {
+//                            list.add(i);
+//                        }
+
                         if(i+3<length)
                         {
                             if (datas[i]>datas[i+3])
@@ -58,6 +63,8 @@ public class CalculateHeartRate {
 
             }
         }
+        System.out.println("findPeaks()");
+        System.out.println(list);
         return list;
     }
 
@@ -126,4 +133,10 @@ public class CalculateHeartRate {
         rrList.add((double)(peaks_list.get(i+1)-peaks_list.get(i)));
         return rrList;
     }
+
+    public static double calDiff(double x1,double x2,double x3,double x4)
+    {
+        return x3+2*x4-x2-2*x1;
+    }
+
 }

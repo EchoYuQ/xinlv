@@ -5,4 +5,13 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
 	<string name="show">显示</string>
+    <string name="heartrate_unit" translatable="false">bpm</string>
+    <string name="measure_rate_default" translatable="false">000</string>
+    <string name="measure_rate_result_error" translatable="false">_ _ _</string>
+
+    <string name="measure_btn_start">Start</string>
+    <string name="measure_btn_save">Save</string>
+    <string name="measure_btn_fail">Retry</string>
+    <string name="history_title">History</string>
+
 </resources>

@@ -11,14 +11,7 @@
                     "endOffset": 108
                 },
                 "from": {
-                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml",
-                    "position": {
-                        "startLine": 3,
-                        "startColumn": 4,
-                        "startOffset": 92,
-                        "endColumn": 57,
-                        "endOffset": 145
-                    }
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
                 }
             },
             {
@@ -30,14 +23,7 @@
                     "endOffset": 164
                 },
                 "from": {
-                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml",
-                    "position": {
-                        "startLine": 4,
-                        "startColumn": 4,
-                        "startOffset": 151,
-                        "endColumn": 55,
-                        "endOffset": 202
-                    }
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
                 }
             },
             {
@@ -45,116 +31,501 @@
                     "startLine": 4,
                     "startColumn": 4,
                     "startOffset": 169,
-                    "endColumn": 52,
-                    "endOffset": 217
+                    "endColumn": 50,
+                    "endOffset": 215
                 },
                 "from": {
-                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml",
-                    "position": {
-                        "startLine": 4,
-                        "startColumn": 4,
-                        "startOffset": 101,
-                        "endColumn": 52,
-                        "endOffset": 149
-                    }
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
                 }
             },
             {
                 "to": {
                     "startLine": 5,
                     "startColumn": 4,
-                    "startOffset": 222,
-                    "endColumn": 41,
-                    "endOffset": 259
+                    "startOffset": 220,
+                    "endColumn": 58,
+                    "endOffset": 274
                 },
                 "from": {
-                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml",
-                    "position": {
-                        "startLine": 3,
-                        "startColumn": 4,
-                        "startOffset": 58,
-                        "endColumn": 41,
-                        "endOffset": 95
-                    }
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
                 }
             },
             {
                 "to": {
                     "startLine": 6,
                     "startColumn": 4,
-                    "startOffset": 264,
-                    "endColumn": 52,
-                    "endOffset": 312
+                    "startOffset": 279,
+                    "endColumn": 58,
+                    "endOffset": 333
                 },
                 "from": {
-                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml",
-                    "position": {
-                        "startLine": 5,
-                        "startColumn": 4,
-                        "startOffset": 155,
-                        "endColumn": 52,
-                        "endOffset": 203
-                    }
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
                 }
             },
             {
                 "to": {
                     "startLine": 7,
                     "startColumn": 4,
-                    "startOffset": 317,
-                    "endColumn": 35,
-                    "endOffset": 348
+                    "startOffset": 338,
+                    "endColumn": 58,
+                    "endOffset": 392
                 },
                 "from": {
-                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml",
-                    "position": {
-                        "startLine": 6,
-                        "startColumn": 1,
-                        "startOffset": 206,
-                        "endColumn": 32,
-                        "endOffset": 237
-                    }
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
                 }
             },
             {
                 "to": {
                     "startLine": 8,
                     "startColumn": 4,
-                    "startOffset": 353,
-                    "endLine": 14,
-                    "endColumn": 12,
-                    "endOffset": 639
+                    "startOffset": 397,
+                    "endColumn": 58,
+                    "endOffset": 451
                 },
                 "from": {
-                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\styles.xml",
-                    "position": {
-                        "startLine": 6,
-                        "startColumn": 4,
-                        "startOffset": 191,
-                        "endLine": 12,
-                        "endColumn": 12,
-                        "endOffset": 481
-                    }
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 9,
+                    "startColumn": 4,
+                    "startOffset": 456,
+                    "endColumn": 58,
+                    "endOffset": 510
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 10,
+                    "startColumn": 4,
+                    "startOffset": 515,
+                    "endColumn": 54,
+                    "endOffset": 565
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 11,
+                    "startColumn": 4,
+                    "startOffset": 570,
+                    "endColumn": 45,
+                    "endOffset": 611
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 12,
+                    "startColumn": 4,
+                    "startOffset": 616,
+                    "endColumn": 54,
+                    "endOffset": 666
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 13,
+                    "startColumn": 4,
+                    "startOffset": 671,
+                    "endColumn": 58,
+                    "endOffset": 725
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 14,
+                    "startColumn": 4,
+                    "startOffset": 730,
+                    "endColumn": 52,
+                    "endOffset": 778
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
                 }
             },
             {
                 "to": {
                     "startLine": 15,
                     "startColumn": 4,
-                    "startOffset": 644,
-                    "endLine": 17,
+                    "startOffset": 783,
+                    "endColumn": 56,
+                    "endOffset": 835
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 16,
+                    "startColumn": 4,
+                    "startOffset": 840,
+                    "endColumn": 62,
+                    "endOffset": 898
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 17,
+                    "startColumn": 4,
+                    "startOffset": 903,
+                    "endColumn": 58,
+                    "endOffset": 957
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 18,
+                    "startColumn": 4,
+                    "startOffset": 962,
+                    "endColumn": 51,
+                    "endOffset": 1009
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 19,
+                    "startColumn": 4,
+                    "startOffset": 1014,
+                    "endColumn": 50,
+                    "endOffset": 1060
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 20,
+                    "startColumn": 4,
+                    "startOffset": 1065,
+                    "endColumn": 58,
+                    "endOffset": 1119
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 21,
+                    "startColumn": 4,
+                    "startOffset": 1124,
+                    "endColumn": 56,
+                    "endOffset": 1176
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 22,
+                    "startColumn": 4,
+                    "startOffset": 1181,
+                    "endColumn": 54,
+                    "endOffset": 1231
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 23,
+                    "startColumn": 4,
+                    "startOffset": 1236,
+                    "endColumn": 56,
+                    "endOffset": 1288
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 24,
+                    "startColumn": 4,
+                    "startOffset": 1293,
+                    "endColumn": 54,
+                    "endOffset": 1343
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 25,
+                    "startColumn": 4,
+                    "startOffset": 1348,
+                    "endColumn": 56,
+                    "endOffset": 1400
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 26,
+                    "startColumn": 4,
+                    "startOffset": 1405,
+                    "endColumn": 59,
+                    "endOffset": 1460
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 27,
+                    "startColumn": 4,
+                    "startOffset": 1465,
+                    "endColumn": 57,
+                    "endOffset": 1518
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 28,
+                    "startColumn": 4,
+                    "startOffset": 1523,
+                    "endColumn": 58,
+                    "endOffset": 1577
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 29,
+                    "startColumn": 4,
+                    "startOffset": 1582,
+                    "endColumn": 56,
+                    "endOffset": 1634
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 30,
+                    "startColumn": 4,
+                    "startOffset": 1639,
+                    "endColumn": 49,
+                    "endOffset": 1684
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\dimens.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 31,
+                    "startColumn": 4,
+                    "startOffset": 1689,
+                    "endColumn": 52,
+                    "endOffset": 1737
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 32,
+                    "startColumn": 4,
+                    "startOffset": 1742,
+                    "endColumn": 41,
+                    "endOffset": 1779
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 33,
+                    "startColumn": 4,
+                    "startOffset": 1784,
+                    "endColumn": 67,
+                    "endOffset": 1847
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 34,
+                    "startColumn": 4,
+                    "startOffset": 1852,
+                    "endColumn": 52,
+                    "endOffset": 1900
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 35,
+                    "startColumn": 4,
+                    "startOffset": 1905,
+                    "endColumn": 49,
+                    "endOffset": 1950
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 36,
+                    "startColumn": 4,
+                    "startOffset": 1955,
+                    "endColumn": 50,
+                    "endOffset": 2001
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 37,
+                    "startColumn": 4,
+                    "startOffset": 2006,
+                    "endColumn": 49,
+                    "endOffset": 2051
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 38,
+                    "startColumn": 4,
+                    "startOffset": 2056,
+                    "endColumn": 51,
+                    "endOffset": 2103
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 39,
+                    "startColumn": 4,
+                    "startOffset": 2108,
+                    "endColumn": 73,
+                    "endOffset": 2177
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 40,
+                    "startColumn": 4,
+                    "startOffset": 2182,
+                    "endColumn": 80,
+                    "endOffset": 2258
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 41,
+                    "startColumn": 4,
+                    "startOffset": 2263,
+                    "endColumn": 35,
+                    "endOffset": 2294
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\strings.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 42,
+                    "startColumn": 4,
+                    "startOffset": 2299,
+                    "endLine": 48,
                     "endColumn": 12,
-                    "endOffset": 799
+                    "endOffset": 2585
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\styles.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 49,
+                    "startColumn": 4,
+                    "startOffset": 2590,
+                    "endLine": 51,
+                    "endColumn": 12,
+                    "endOffset": 2745
+                },
+                "from": {
+                    "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\styles.xml"
+                }
+            },
+            {
+                "to": {
+                    "startLine": 52,
+                    "startColumn": 4,
+                    "startOffset": 2750,
+                    "endLine": 54,
+                    "endColumn": 12,
+                    "endOffset": 2854
                 },
                 "from": {
                     "file": "H:\\AndroidWorkSpace3\\xinlv\\res\\values\\styles.xml",
                     "position": {
-                        "startLine": 15,
+                        "startLine": 19,
                         "startColumn": 4,
-                        "startOffset": 522,
-                        "endLine": 17,
+                        "startOffset": 690,
+                        "endLine": 21,
                         "endColumn": 12,
-                        "endOffset": 679
+                        "endOffset": 796
                     }
                 }
             }
